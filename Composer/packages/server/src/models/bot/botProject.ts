@@ -54,6 +54,7 @@ export class BotProject implements IBotProject {
   public name: string;
   public dir: string;
   public dataDir: string;
+  public eTag?: string;
   public fileStorage: IFileStorage;
   public builder: Builder;
   public defaultSDKSchema: {
@@ -69,11 +70,12 @@ export class BotProject implements IBotProject {
 
   private files = new Map<string, FileInfo>();
 
-  constructor(ref: LocationRef, user?: UserIdentity) {
+  constructor(ref: LocationRef, user?: UserIdentity, eTag?: string) {
     this.ref = ref;
     this.dir = Path.resolve(this.ref.path); // make sure we switch to posix style after here
     this.dataDir = this.dir;
     this.name = Path.basename(this.dir);
+    this.eTag = eTag;
 
     this.defaultSDKSchema = JSON.parse(fs.readFileSync(Path.join(__dirname, '../../../schemas/sdk.schema'), 'utf-8'));
     this.defaultUISchema = JSON.parse(fs.readFileSync(Path.join(__dirname, '../../../schemas/sdk.uischema'), 'utf-8'));
@@ -501,7 +503,7 @@ export class BotProject implements IBotProject {
 
   public copyTo = async (locationRef: LocationRef, user?: UserIdentity) => {
     const newProjRef = await this.cloneFiles(locationRef);
-    return new BotProject(newProjRef, user);
+    return new BotProject(newProjRef, user, this.eTag || '');
   };
 
   public async exists(): Promise<boolean> {
@@ -592,6 +594,11 @@ export class BotProject implements IBotProject {
     if (dirToDelete.length > 3 && this.fileStorage.exists(dirToDelete)) {
       this.fileStorage.rmrfDir(dirToDelete);
     }
+  }
+
+  public updateETag(eTag: string): void {
+    this.eTag = eTag;
+    // also update the bot project map
   }
 
   private async removeLocalRuntimeData(projectId) {

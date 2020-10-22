@@ -32,7 +32,7 @@ let currentAppLocale = getAppLocale().appLocale;
 const error = log.extend('error');
 let serverPort;
 let signalThatMainWindowIsShowing;
-let waitForMainWindowToShow = new Promise((resolve) => {
+const waitForMainWindowToShow = new Promise((resolve) => {
   signalThatMainWindowIsShowing = resolve;
 });
 
@@ -179,6 +179,18 @@ async function main(show = false) {
         .catch((e) =>
           console.error('[Windows] Error while waiting for main window to show before processing deep link: ', e)
         );
+    } else {
+      // simulate launching a mac deep link
+      waitForMainWindowToShow
+        .then(async () => {
+          const url =
+            'bfcomposer://import?source=pva&payload=%7B%22botId%22%3A%22f2a9af02-b019-4094-9474-f3d5aa68106c%22%2C%22description%22%3A%22A%20bot%20that%20reports%20the%20current%20weather.%22%2C%22envId%22%3A%225d8804e2-ed21-4ad1-8eee-e86db6939406%22%2C%22name%22%3A%22toanzian-test-bot1%22%2C%22tenantId%22%3A%2272f988bf-86f1-41af-91ab-2d7cd011db47%22%7D';
+
+          const deeplinkUrl = parseDeepLinkUrl(url);
+          const mainWindow = ElectronWindow.getInstance().browserWindow;
+          await mainWindow?.loadURL(getBaseUrl() + deeplinkUrl);
+        })
+        .catch((e) => console.error(e));
     }
 
     mainWindow.on('closed', () => {

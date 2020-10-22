@@ -3,7 +3,7 @@
 import { app } from 'electron';
 
 import ElectronWindow from '../electronWindow';
-import { isLinux, isWindows } from '../utility/platform';
+import { isLinux, isMac, isWindows } from '../utility/platform';
 import logger from '../utility/logger';
 
 const log = logger.extend('one-auth');
@@ -11,9 +11,14 @@ const log = logger.extend('one-auth');
 let oneAuth;
 if (isWindows()) {
   oneAuth = require('oneauth-win64');
-} else {
+}
+if (isMac()) {
   oneAuth = require('oneauth-mac');
 }
+if (isLinux()) {
+  oneAuth = {};
+}
+
 const COMPOSER_APP_ID = 'com.microsoft.BotFrameworkComposer';
 const COMPOSER_APP_NAME = 'BotFrameworkComposer';
 const COMPOSER_APP_VERSION = app.getVersion();
@@ -34,19 +39,12 @@ type AuthParamOptions = Partial<PartialAuthParamaters>;
 
 class OneAuthInstance {
   private initialized: boolean;
-  private _oneAuth: any; //eslint-disable-line
+  private oneAuth: any; //eslint-disable-line
 
   constructor() {
     // will wait until called to initialize (so that we're sure we have a browser window)
     this.initialized = false;
-    this._oneAuth = oneAuth;
-    if (isLinux()) {
-      this._oneAuth = {};
-    }
-  }
-
-  private get oneAuth() {
-    return this._oneAuth;
+    this.oneAuth = oneAuth;
   }
 
   private initialize() {
@@ -63,7 +61,7 @@ class OneAuthInstance {
         log('%s %s', logLevel, message);
       });
       log('Initializing...');
-      const appConfig = new this._oneAuth.AppConfiguration(
+      const appConfig = new this.oneAuth.AppConfiguration(
         COMPOSER_APP_ID,
         COMPOSER_APP_NAME,
         COMPOSER_APP_VERSION,
@@ -73,7 +71,7 @@ class OneAuthInstance {
       );
       // Personal Accounts
       // const msaConfig = new OneAuth.MsaConfiguration();
-      const aadConfig = new this._oneAuth.AadConfiguration(
+      const aadConfig = new this.oneAuth.AadConfiguration(
         COMPOSER_CLIENT_ID,
         COMPOSER_REDIRECT_URI,
         GRAPH_RESOURCE,
@@ -96,7 +94,7 @@ class OneAuthInstance {
     log('Getting access token...');
     let params;
     if (options) {
-      params = new this._oneAuth.AuthParameters(
+      params = new this.oneAuth.AuthParameters(
         DEFAULT_AUTH_SCHEME,
         DEFAULT_AUTH_AUTHORITY,
         options.target || GRAPH_RESOURCE,
@@ -134,7 +132,7 @@ class OneAuthInstance {
     log('Getting access token silently...');
     let params;
     if (options) {
-      params = new this._oneAuth.AuthParameters(
+      params = new this.oneAuth.AuthParameters(
         DEFAULT_AUTH_SCHEME,
         DEFAULT_AUTH_AUTHORITY,
         options.target || GRAPH_RESOURCE,

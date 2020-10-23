@@ -96,6 +96,7 @@ export enum SDKKinds {
   OnRepromptDialog = 'Microsoft.OnRepromptDialog',
   OnTypingActivity = 'Microsoft.OnTypingActivity',
   OnUnknownIntent = 'Microsoft.OnUnknownIntent',
+  OrchestratorRecognizer = 'Microsoft.OrchestratorRecognizer',
   OrdinalEntityRecognizer = 'Microsoft.OrdinalEntityRecognizer',
   PercentageEntityRecognizer = 'Microsoft.PercentageEntityRecognizer',
   PhoneNumberEntityRecognizer = 'Microsoft.PhoneNumberEntityRecognizer',

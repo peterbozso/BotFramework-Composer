@@ -20,7 +20,7 @@ const config: PluginConfig = {
         displayName: () => formatMessage('Orchestrator'),
         intentEditor: 'LuIntentEditor',
         isSelected: (data) => {
-          return typeof data === 'string' && (data.endsWith('.lu') || data.endsWith('.qna'));
+          return typeof data === 'string' && data.endsWith('.oc');
         },
         seedNewRecognizer: (shellData) => {
           const { luFiles, currentDialog, locale } = shellData;
@@ -32,7 +32,8 @@ const config: PluginConfig = {
           }
 
           try {
-            return `${luFile.id.split('.')[0]}.lu`;
+            //return `${luFile.id.split('.')[0]}.oc`;
+            return { $kind: 'Microsoft.OrchestratorRecognizer' };
           } catch (err) {
             return '';
           }

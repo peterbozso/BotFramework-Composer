@@ -22,7 +22,11 @@ const config: PluginConfig = {
         isSelected: (data) => {
           return typeof data === 'string' && data.endsWith('.oc');
         },
-        seedNewRecognizer: (shellData) => {
+        seedNewRecognizer: (shellData, shellApi) => {
+          //trigger the download of the model if needed
+          //TODO: must check model exists when publishing as well
+          fetch('/api/orchestrator/downloadModel');
+
           const { luFiles, currentDialog, locale } = shellData;
           const luFile = luFiles.find((f) => f.id === `${currentDialog.id}.${locale}`);
 

@@ -13,6 +13,7 @@ import log from '../../logger';
 
 import { IOrchestratorBuildOutput, IOrchestratorNLRList, IOrchestratorProgress } from './interface';
 import { luImportResolverGenerator, getLUFiles, getQnAFiles } from './luResolver';
+import { writeFile } from 'fs';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const crossTrainer = require('@microsoft/bf-lu/lib/parser/cross-train/crossTrainer.js');
@@ -72,10 +73,31 @@ export class Builder {
       //do cross train before publish
       await this.crossTrain(luFiles, qnaFiles, allFiles);
       const { interruptionLuFiles, interruptionQnaFiles } = await this.getInterruptionFiles();
+      await this.doOrchestratorBuildAsync(interruptionLuFiles);
       await this.runLuBuild(interruptionLuFiles, allFiles);
       await this.runQnaBuild(interruptionQnaFiles);
     } catch (error) {
       throw new Error(error.message ?? error.text ?? 'Error publishing to LUIS or QNA.');
+    }
+  };
+
+  public doOrchestratorBuildAsync = async (luFiles: FileInfo[]) => {
+    //orchestrator stuff
+    let nlrList = await this.runOrchestratorNlrList();
+    let defaultNLR = nlrList.default;
+    let modelPath = Path.resolve(Path.join('models', defaultNLR));
+    console.log('modelPath: ' + modelPath);
+    let returnData = await this.runOrchestratorBuild(luFiles, modelPath);
+    console.log(returnData.outputs[0].id);
+
+    for (let dialog of returnData.outputs) {
+      let bluFilePath = Path.resolve(this.generatedFolderPath, dialog.id.replace('.lu', '.blu'));
+      console.log(bluFilePath);
+      writeFile(bluFilePath, Buffer.from(dialog.snapshot), (err) => {
+        if (err) {
+          console.log('cannot write snapshot');
+        }
+      });
     }
   };
 

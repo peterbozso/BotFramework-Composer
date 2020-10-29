@@ -47,6 +47,7 @@ import {
   localeState,
   qnaFilesState,
   rootBotProjectIdSelector,
+  botProjectSpaceSelector,
 } from '../../recoilModel';
 import { CreateQnAModal } from '../../components/QnA';
 import { triggerNotSupported } from '../../utils/dialogValidator';
@@ -144,6 +145,9 @@ const DesignPage: React.FC<RouteComponentProps<{ dialogId: string; projectId: st
     createQnAKBFromScratch,
     createQnAFromUrlDialogBegin,
     setCurrentPageMode,
+    addExistingSkillToBotProject,
+    addNewSkillToBotProject,
+    removeSkillFromBotProject,
   } = useRecoilValue(dispatcherState);
 
   const params = new URLSearchParams(location?.search);
@@ -161,6 +165,8 @@ const DesignPage: React.FC<RouteComponentProps<{ dialogId: string; projectId: st
   const shellForPropertyEditor = useShell('PropertyEditor', projectId);
   const triggerApi = useTriggerApi(projectId);
   const { createTrigger, createQnATrigger } = shell.api;
+  const appLocale = useRecoilValue(localeState(rootProjectId));
+  const botProjectsSpace = useRecoilValue(botProjectSpaceSelector);
 
   useEffect(() => {
     const currentDialog = dialogs.find(({ id }) => id === dialogId);
@@ -325,6 +331,78 @@ const DesignPage: React.FC<RouteComponentProps<{ dialogId: string; projectId: st
                 projectId,
                 showFromScratch: true,
               });
+            },
+          },
+          {
+            'data-testid': 'AddRemoteSkill',
+            key: 'addRemoteSkill',
+            text: formatMessage(`Add remote skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              addRemoteSkillToBotProject(
+                'https://onenote-dev.azurewebsites.net/manifests/OneNoteSync-2-1-preview-1-manifest.json',
+                'remote'
+              );
+            },
+          },
+          {
+            'data-testid': 'createNewSkill',
+            key: 'createNewSkill',
+            text: formatMessage(`Create new Skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              addNewSkillToBotProject({
+                name: 'newers-bot',
+                description: '',
+                schemaUrl: '',
+                location: '/Users/srravich/Desktop/samples/Archive',
+                templateId: 'InterruptionSample',
+                locale: appLocale,
+                qnaKbUrls: [],
+              });
+            },
+          },
+          {
+            'data-testid': 'removeSkillAtIndex',
+            key: 'removeSkillAtIndex',
+            text: formatMessage(`Remove a skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              const matchedProject: any = botProjectsSpace[botProjectsSpace.length - 1];
+              removeSkillFromBotProject(matchedProject.projectId);
+            },
+          },
+          {
+            'data-testid': 'AddLocalSkill',
+            key: 'addLocalSkill',
+            text: formatMessage(`Add Google Keep Skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              addExistingSkillToBotProject('/Users/srravich/Desktop/samples/Archive/GoogleKeepSync');
+            },
+          },
+          {
+            'data-testid': 'AddLocalSkill-1',
+            key: 'addLocalSkill',
+            text: formatMessage(`Add Todo Skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              addExistingSkillToBotProject('/Users/srravich/Desktop/samples/Archive/Todo-Skill');
+            },
+          },
+          {
+            'data-testid': 'AddNewRemoteSkill',
+            key: 'AddNewRemoteSkill',
+            text: formatMessage(`Add New Remote skill`, {
+              displayName: currentDialog?.displayName ?? '',
+            }),
+            onClick: () => {
+              setAddSkillDialogModalVisibility(true);
             },
           },
         ],

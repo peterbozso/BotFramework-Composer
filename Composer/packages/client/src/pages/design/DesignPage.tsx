@@ -13,7 +13,6 @@ import { ActionButton } from 'office-ui-fabric-react/lib/Button';
 import { JsonEditor } from '@bfc/code-editor';
 import { EditorExtension, PluginConfig } from '@bfc/extension-client';
 import { useRecoilValue } from 'recoil';
-import { IContextualMenuItem } from 'office-ui-fabric-react/lib/components/ContextualMenu/ContextualMenu.types';
 
 import { LeftRightSplit } from '../../components/Split/LeftRightSplit';
 import { LoadingSpinner } from '../../components/LoadingSpinner';

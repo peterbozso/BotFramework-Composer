@@ -3024,10 +3024,10 @@
     seedrandom "~3.0.5"
     swagger-parser "^8.0.4"
 
-"@microsoft/bf-lu@^4.11.0-dev.20201013.7ccb128", "@microsoft/bf-lu@next":
-  version "4.11.0-dev.20201013.7ccb128"
-  resolved "https://registry.yarnpkg.com/@microsoft/bf-lu/-/bf-lu-4.11.0-dev.20201013.7ccb128.tgz#9dbb5043d3f7a384d1449c73fd984016b5115ca4"
-  integrity sha512-xaG5yDxtdwNNfYa6cs9wmCGTN6K6d2sh8jfGvMt7dqs26My3c6Sus03VF74sRrp2OQXnbBLqZPVY1qzLKnjoJg==
+"@microsoft/bf-lu@^4.11.0-dev.20201015.a41c691":
+  version "4.11.0-dev.20201016.24ec3b9"
+  resolved "https://botbuilder.myget.org/F/botframework-cli/npm/@microsoft/bf-lu/-/@microsoft/bf-lu-4.11.0-dev.20201016.24ec3b9.tgz#a0f3880087978ff09236510e25ffcf085cbeee5a"
+  integrity sha1-oPOIAIeXj/CSNlEOJf/PCFy+7lo=
   dependencies:
     "@azure/cognitiveservices-luis-authoring" "4.0.0-preview.1"
     "@azure/ms-rest-azure-js" "2.0.1"
@@ -3046,10 +3046,32 @@
     semver "^5.5.1"
     tslib "^2.0.3"
 
-"@microsoft/bf-lu@^4.11.0-dev.20201015.a41c691":
-  version "4.11.0-dev.20201016.24ec3b9"
-  resolved "https://botbuilder.myget.org/F/botframework-cli/npm/@microsoft/bf-lu/-/@microsoft/bf-lu-4.11.0-dev.20201016.24ec3b9.tgz#a0f3880087978ff09236510e25ffcf085cbeee5a"
-  integrity sha1-oPOIAIeXj/CSNlEOJf/PCFy+7lo=
+"@microsoft/bf-lu@^4.11.0-rc.20201030.a9f9b96":
+  version "4.11.0-rc.20201030.a9f9b96"
+  resolved "https://registry.yarnpkg.com/@microsoft/bf-lu/-/bf-lu-4.11.0-rc.20201030.a9f9b96.tgz#9fcb2a18d66bcef74eabc98f06df4574215c402f"
+  integrity sha512-+VFZUGQdH+1lwuSxE9G2lOqO6KPevvhijKyX8N93/I+VxwfHuCF/BZ439MseT3+vJ9OzATfkeccqgOuI/kNBlQ==
+  dependencies:
+    "@azure/cognitiveservices-luis-authoring" "4.0.0-preview.1"
+    "@azure/ms-rest-azure-js" "2.0.1"
+    "@types/node-fetch" "~2.5.5"
+    antlr4 "^4.7.2"
+    chalk "2.4.1"
+    console-stream "^0.1.1"
+    deep-equal "^1.0.1"
+    delay "^4.3.0"
+    fs-extra "^8.1.0"
+    get-stdin "^6.0.0"
+    globby "^10.0.1"
+    intercept-stdout "^0.1.2"
+    lodash "^4.17.19"
+    node-fetch "~2.6.0"
+    semver "^5.5.1"
+    tslib "^2.0.3"
+
+"@microsoft/bf-lu@next":
+  version "4.12.0-dev.20201030.307bcd7"
+  resolved "https://registry.yarnpkg.com/@microsoft/bf-lu/-/bf-lu-4.12.0-dev.20201030.307bcd7.tgz#4106708c9fff4e3f5e4b1ef87943ee902d423dae"
+  integrity sha512-v/yvHpLNQV6cVFux+TylhqEjb1Af3dzC7plHIwy8BpEwBNfs5nK6D5Fiqy45EIN391VlDrYTGxOYdRZatU9Hfg==
   dependencies:
     "@azure/cognitiveservices-luis-authoring" "4.0.0-preview.1"
     "@azure/ms-rest-azure-js" "2.0.1"

@@ -51,7 +51,8 @@ export async function start(electronContext?: ElectronContext): Promise<number |
   ExtensionContext.useExpress(app);
 
   // load all installed plugins
-  setEnvDefault('COMPOSER_EXTENSION_DATA', path.resolve(__dirname, '../../../.composer/extensions.json'));
+  setEnvDefault('COMPOSER_EXTENSION_MANIFEST', path.resolve(__dirname, '../../../.composer/extensions.json'));
+  setEnvDefault('COMPOSER_EXTENSION_DATA_DIR', path.resolve(__dirname, '../../../.composer/extension-data'));
   setEnvDefault('COMPOSER_BUILTIN_EXTENSIONS_DIR', path.resolve(__dirname, '../../../../extensions'));
   // Composer/.composer/extensions
   setEnvDefault('COMPOSER_REMOTE_EXTENSIONS_DIR', path.resolve(__dirname, '../../../.composer/extensions'));
@@ -117,6 +118,10 @@ export async function start(electronContext?: ElectronContext): Promise<number |
       log(err);
       res.status(500).json({ message: err.message });
     }
+  });
+
+  app.get(`${BASEURL}/plugin-host.html`, (req, res) => {
+    res.render(path.resolve(clientDirectory, 'plugin-host.ejs'), { __nonce__: req.__nonce__ });
   });
 
   app.get('*', (req, res) => {

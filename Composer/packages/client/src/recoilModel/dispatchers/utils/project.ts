@@ -46,7 +46,7 @@ import {
   botStatusState,
   currentProjectIdState,
   dialogSchemasState,
-  dialogsState,
+  dialogState,
   filePersistenceState,
   formDialogSchemaIdsState,
   formDialogSchemaState,
@@ -62,6 +62,7 @@ import {
   settingsState,
   skillManifestsState,
   skillsState,
+  dialogIdsState,
   showCreateQnAFromUrlDialogState,
 } from '../../atoms';
 import * as botstates from '../../atoms/botState';
@@ -73,6 +74,9 @@ import { rootBotProjectIdSelector } from '../../selectors';
 import { undoHistoryState } from '../../undo/history';
 import UndoHistory from '../../undo/undoHistory';
 import { logMessage, setError } from '../shared';
+
+import { crossTrainConfigState } from './../../atoms/botState';
+import { recognizersSelectorFamily } from './../../selectors/recognizers';
 
 export const resetBotStates = async ({ reset }: CallbackInterface, projectId: string) => {
   const botStates = Object.keys(botstates);
@@ -271,6 +275,8 @@ export const initBotState = async (callbackHelpers: CallbackInterface, data: any
     skillManifestFiles,
     skills,
     mergedSettings,
+    recognizers,
+    crossTrainConfig,
   } = botFiles;
   const curLocation = await snapshot.getPromise(locationState(projectId));
   const storedLocale = languageStorage.get(botName)?.locale;
@@ -285,13 +291,19 @@ export const initBotState = async (callbackHelpers: CallbackInterface, data: any
   }
 
   let mainDialog = '';
-  const verifiedDialogs = dialogs.map((dialog) => {
+  const dialogIds: string[] = [];
+  dialogs.forEach((dialog) => {
     if (dialog.isRoot) {
       mainDialog = dialog.id;
     }
     dialog.diagnostics = validateDialog(dialog, schemas.sdk.content, lgFiles, luFiles);
-    return dialog;
+    set(dialogState({ projectId, dialogId: dialog.id }), dialog);
+    dialogIds.push(dialog.id);
   });
+
+  set(dialogIdsState(projectId), dialogIds);
+  set(recognizersSelectorFamily(projectId), recognizers);
+  set(crossTrainConfigState(projectId), crossTrainConfig);
 
   await lgWorker.addProject(projectId, lgFiles);
 
@@ -308,7 +320,7 @@ export const initBotState = async (callbackHelpers: CallbackInterface, data: any
   set(luFilesState(projectId), initLuFilesStatus(botName, luFiles, dialogs));
   set(lgFilesState(projectId), lgFiles);
   set(jsonSchemaFilesState(projectId), jsonSchemaFiles);
-  set(dialogsState(projectId), verifiedDialogs);
+
   set(dialogSchemasState(projectId), dialogSchemas);
   set(botEnvironmentState(projectId), botEnvironment);
   set(botDisplayNameState(projectId), botName);

@@ -77,7 +77,6 @@ export interface AppUpdateState {
 }
 
 export interface BreadcrumbItem {
-  skillId?: string;
   dialogId: string;
   selected: string;
   focused: string;

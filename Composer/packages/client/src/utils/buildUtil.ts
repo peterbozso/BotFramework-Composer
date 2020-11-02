@@ -10,7 +10,7 @@ import { getReferredQnaFiles } from './qnaUtil';
 import { getBaseName } from './fileUtil';
 
 function createConfigId(fileId: string, language: string) {
-  return `${fileId}.${language}`;
+  return `${fileId}.${language}.lu`;
 }
 
 export function createCrossTrainConfig(dialogs: DialogInfo[], luFiles: LuFile[], languages: string[]) {
@@ -29,7 +29,7 @@ export function createCrossTrainConfig(dialogs: DialogInfo[], luFiles: LuFile[],
       const triggers = filtered.reduce((result, { intent, dialogs }) => {
         const ids = dialogs
           .map((dialog) => createConfigId(dialog, language))
-          .filter((id) => luFiles.some((file) => `${file.id}` === id));
+          .filter((id) => luFiles.some((file) => `${file.id}.lu` === id));
         if (!ids.length && dialogs.length) return result;
         result[intent] = ids;
         return result;

@@ -7,16 +7,15 @@ import formatMessage from 'format-message';
 import {
   builtInStringFormats,
   FormDialogProperty,
-  FormDialogPropertyKind,
   FormDialogPropertyPayload,
   IntegerPropertyPayload,
   NumberPropertyPayload,
   RefPropertyPayload,
+  FormDialogPropertyKind,
   StringPropertyPayload,
   TypedPropertyPayload,
 } from 'src/atoms/types';
 import { generateId } from 'src/utils/base';
-import { nameRegex } from 'src/utils/constants';
 
 export const getDefaultPayload = (kind: FormDialogPropertyKind) => {
   switch (kind) {
@@ -262,7 +261,7 @@ export const validateSchemaPropertyStore = (property: FormDialogProperty) => {
     }
   }
 
-  return !!(payloadValid && property.name && nameRegex.test(property.name));
+  return !!(payloadValid && property.name);
 };
 
 export const getPropertyTypeDisplayName = (property: FormDialogProperty) => {

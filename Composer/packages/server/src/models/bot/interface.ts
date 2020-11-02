@@ -3,6 +3,9 @@
 
 import { BaseSchema, ILuisConfig, IQnAConfig } from '@bfc/shared';
 
+import { CrossTrainConfig } from './builder';
+import { RecognizerTypes } from './recognizer';
+
 export type Resource = { id: string; isEmpty: boolean };
 
 export interface LocationRef {
@@ -15,6 +18,8 @@ export interface IBuildConfig {
   qnaConfig: IQnAConfig;
   luResource: Resource[];
   qnaResource: Resource[];
+  crossTrainConfig: CrossTrainConfig;
+  recognizerTypes: RecognizerTypes;
 }
 
 export interface ILuisSettings {

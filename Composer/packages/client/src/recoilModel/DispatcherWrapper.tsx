@@ -24,11 +24,8 @@ import {
   filePersistenceState,
   botProjectFileState,
   jsonSchemaFilesState,
-  crossTrainConfigState,
 } from './atoms';
 import { botsForFilePersistenceSelector, formDialogSchemasSelectorFamily } from './selectors';
-import { Recognizer } from './Recognizers';
-import { recognizersSelectorFamily } from './selectors/recognizers';
 
 const getBotAssets = async (projectId, snapshot: Snapshot): Promise<BotAssets> => {
   const result = await Promise.all([
@@ -42,8 +39,6 @@ const getBotAssets = async (projectId, snapshot: Snapshot): Promise<BotAssets> =
     snapshot.getPromise(botProjectFileState(projectId)),
     snapshot.getPromise(formDialogSchemasSelectorFamily(projectId)),
     snapshot.getPromise(jsonSchemaFilesState(projectId)),
-    snapshot.getPromise(recognizersSelectorFamily(projectId)),
-    snapshot.getPromise(crossTrainConfigState(projectId)),
   ]);
   return {
     projectId,
@@ -57,8 +52,6 @@ const getBotAssets = async (projectId, snapshot: Snapshot): Promise<BotAssets> =
     botProjectFile: result[7],
     formDialogSchemas: result[8],
     jsonSchemaFiles: result[9],
-    recognizers: result[10],
-    crossTrainConfig: result[11],
   };
 };
 
@@ -117,10 +110,7 @@ export const DispatcherWrapper = ({ children }) => {
   return (
     <Fragment>
       {botProjects.map((projectId) => (
-        <Fragment key={projectId}>
-          <UndoRoot projectId={projectId} />
-          <Recognizer projectId={projectId} />
-        </Fragment>
+        <UndoRoot key={projectId} projectId={projectId} />
       ))}
       <InitDispatcher onLoad={setLoaded} />
       {loaded ? children : null}

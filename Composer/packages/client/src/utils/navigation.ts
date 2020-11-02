@@ -69,13 +69,9 @@ export function getUrlSearch(selected: string, focused: string): string {
 export function checkUrl(
   currentUri: string,
   projectId: string,
-  skillId: string | null,
   { dialogId, selected, focused, promptTab }: DesignPageLocation
 ) {
-  let lastUri =
-    skillId == null
-      ? `/bot/${projectId}/dialogs/${dialogId}${getUrlSearch(selected, focused)}`
-      : `/bot/${projectId}/skill/${skillId}/dialogs/${dialogId}${getUrlSearch(selected, focused)}`;
+  let lastUri = `/bot/${projectId}/dialogs/${dialogId}${getUrlSearch(selected, focused)}`;
   if (promptTab) {
     lastUri += `#${promptTab}`;
   }
@@ -87,23 +83,14 @@ export interface NavigationState {
   qnaKbUrls?: string[];
 }
 
-export function convertPathToUrl(
-  projectId: string,
-  skillId: string | null,
-  dialogId: string | null,
-  path?: string
-): string {
+export function convertPathToUrl(projectId: string, skillId: string | null, dialogId: string, path?: string): string {
   //path is like main.triggers[0].actions[0]
   //uri = id?selected=triggers[0]&focused=triggers[0].actions[0]
 
-  let uri = `/bot/${projectId}`;
-  if (skillId != null) {
-    uri += `/skill/${skillId}`;
-  }
-  if (dialogId != null) {
-    uri += `/dialogs/${dialogId}`;
-  }
-
+  let uri =
+    skillId == null
+      ? `/bot/${projectId}/dialogs/${dialogId}`
+      : `/bot/${projectId}/skill/${skillId}/dialogs/${dialogId}`;
   if (!path) return uri;
 
   const items = path.split('#');

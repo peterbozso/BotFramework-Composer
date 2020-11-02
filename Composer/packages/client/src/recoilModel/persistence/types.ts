@@ -18,8 +18,6 @@ export enum FileExtensions {
   SourceQnA = '.source.qna',
   Setting = 'appsettings.json',
   BotProject = '.botproj',
-  Recognizer = '',
-  CrossTrainConfig = 'cross-train.config.json',
 }
 
 export type FileErrorHandler = (error) => void;

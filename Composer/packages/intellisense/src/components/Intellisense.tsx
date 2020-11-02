@@ -97,19 +97,19 @@ export const Intellisense = React.memo(
         }
       };
 
-      const keydownHandler = (event: KeyboardEvent) => {
-        if ((event.key === 'Escape' || event.key === 'Tab') && focused) {
+      const keyupHandler = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && focused) {
           setShowCompletionList(false);
           onBlur && onBlur(id);
         }
       };
 
       document.body.addEventListener('click', outsideClickHandler);
-      document.body.addEventListener('keydown', keydownHandler);
+      document.body.addEventListener('keyup', keyupHandler);
 
       return () => {
         document.body.removeEventListener('click', outsideClickHandler);
-        document.body.removeEventListener('keydown', keydownHandler);
+        document.body.removeEventListener('keyup', keyupHandler);
       };
     }, [focused, onBlur]);
 

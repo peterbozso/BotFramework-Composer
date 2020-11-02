@@ -12,6 +12,7 @@ import { BotProject } from '../botProject';
 import { LocationRef } from '../interface';
 
 import { Resource } from './../interface';
+import { RecognizerTypes } from './../recognizer';
 
 jest.mock('azure-storage', () => {
   return {};
@@ -45,7 +46,7 @@ beforeEach(async () => {
 describe('init', () => {
   it('should get project successfully', () => {
     const project: { [key: string]: any } = proj.getProject();
-    expect(project.files.length).toBe(16);
+    expect(project.files.length).toBe(15);
   });
 
   it('should always have a default bot project file', () => {
@@ -124,7 +125,7 @@ describe('copyTo', () => {
     const newBotProject = await proj.copyTo(locationRef);
     await newBotProject.init();
     const project: { [key: string]: any } = newBotProject.getProject();
-    expect(project.files.length).toBe(16);
+    expect(project.files.length).toBe(15);
   });
 });
 
@@ -298,7 +299,9 @@ describe('buildFiles', () => {
       { id: 'b.en-us', isEmpty: false },
       { id: 'bot1.en-us', isEmpty: false },
     ];
-    await proj.buildFiles({ luisConfig, qnaConfig, luResource, qnaResource });
+    const crossTrainConfig = {};
+    const recognizerTypes: RecognizerTypes = { a: 'DefaultRecognizer', b: 'DefaultRecognizer', c: 'DefaultRecognizer' };
+    await proj.buildFiles({ luisConfig, qnaConfig, luResource, qnaResource, crossTrainConfig, recognizerTypes });
 
     try {
       if (fs.existsSync(path)) {
@@ -407,7 +410,7 @@ describe('deleteAllFiles', () => {
     const newBotProject = await proj.copyTo(locationRef);
     await newBotProject.init();
     const project: { [key: string]: any } = newBotProject.getProject();
-    expect(project.files.length).toBe(16);
+    expect(project.files.length).toBe(15);
     await newBotProject.deleteAllFiles();
     expect(fs.existsSync(copyDir)).toBe(false);
   });

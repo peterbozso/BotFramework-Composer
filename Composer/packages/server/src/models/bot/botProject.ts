@@ -30,12 +30,12 @@ import log from '../../logger';
 import { BotProjectService } from '../../services/project';
 import AssetService from '../../services/asset';
 
-import { isCrossTrainConfig } from './botStructure';
 import { Builder } from './builder';
 import { IFileStorage } from './../storage/interface';
 import { LocationRef, IBuildConfig } from './interface';
 import { retrieveSkillManifests } from './skillManager';
-import { defaultFilePath, serializeFiles, parseFileName, isRecognizer } from './botStructure';
+import { defaultFilePath, serializeFiles, parseFileName } from './botStructure';
+import { PreBuilder } from './preBuilder';
 
 const debug = log.extend('bot-project');
 const mkDirAsync = promisify(fs.mkdir);
@@ -56,6 +56,7 @@ export class BotProject implements IBotProject {
   public dataDir: string;
   public fileStorage: IFileStorage;
   public builder: Builder;
+  public preBuilder: PreBuilder;
   public defaultSDKSchema: {
     [key: string]: string;
   };
@@ -81,6 +82,7 @@ export class BotProject implements IBotProject {
     this.settingManager = new DefaultSettingManager(this.dir);
     this.fileStorage = StorageService.getStorageClient(this.ref.storageId, user);
     this.builder = new Builder(this.dir, this.fileStorage, defaultLanguage);
+    this.preBuilder = new PreBuilder(this.dir, this.fileStorage);
   }
 
   public get dialogFiles() {
@@ -92,12 +94,6 @@ export class BotProject implements IBotProject {
     });
 
     return files;
-  }
-
-  public get rootDialogId() {
-    const mainDialogFile = this.dialogFiles.find((file) => !file.relativePath.includes('/'));
-
-    return Path.basename(mainDialogFile?.name ?? '', '.dialog');
   }
 
   public get formDialogSchemaFiles() {
@@ -356,20 +352,24 @@ export class BotProject implements IBotProject {
   public updateBotInfo = async (name: string, description: string, preserveRoot = false) => {
     const mainDialogFile = this.dialogFiles.find((file) => !file.relativePath.includes('/'));
     if (!mainDialogFile) return;
-
-    const botName = name.trim();
-
+    const botName = name.trim().toLowerCase();
     const { relativePath } = mainDialogFile;
     const content = JSON.parse(mainDialogFile.content);
-
-    const { $designer } = content;
-
-    content.$designer = $designer?.id ? { ...$designer, name, description } : getNewDesigner(botName, description);
-
-    content.id = preserveRoot ? Path.basename(mainDialogFile.name, '.dialog') : botName;
-
-    const updatedContent = autofixReferInDialog(content.id, JSON.stringify(content, null, 2));
-
+    if (!content.$designer) return;
+    const oldDesigner = content.$designer;
+    let newDesigner;
+    if (oldDesigner && oldDesigner.id) {
+      newDesigner = {
+        ...oldDesigner,
+        name,
+        description,
+      };
+    } else {
+      newDesigner = getNewDesigner(name, description);
+    }
+    content.$designer = newDesigner;
+    content.id = name;
+    const updatedContent = autofixReferInDialog(botName, JSON.stringify(content, null, 2));
     await this._updateFile(relativePath, updatedContent);
 
     for (const botProjectFile of this.botProjectFiles) {
@@ -418,8 +418,6 @@ export class BotProject implements IBotProject {
   };
 
   public validateFileName = (name: string) => {
-    if (isRecognizer(name)) return;
-    if (isCrossTrainConfig(name)) return;
     const { fileId, fileType } = parseFileName(name, '');
 
     let fileName = fileId;
@@ -436,7 +434,7 @@ export class BotProject implements IBotProject {
     this._validateFileContent(name, content);
     const botName = this.name;
     const defaultLocale = this.settings?.defaultLanguage || defaultLanguage;
-    const relativePath = defaultFilePath(botName, defaultLocale, filename, this.rootDialogId);
+    const relativePath = defaultFilePath(botName, defaultLocale, filename);
     const file = this.files.get(filename);
     if (file) {
       throw new Error(`${filename} dialog already exist`);
@@ -453,7 +451,14 @@ export class BotProject implements IBotProject {
     return createdFiles;
   };
 
-  public buildFiles = async ({ luisConfig, qnaConfig, luResource = [], qnaResource = [] }: IBuildConfig) => {
+  public buildFiles = async ({
+    luisConfig,
+    qnaConfig,
+    luResource = [],
+    qnaResource = [],
+    crossTrainConfig,
+    recognizerTypes,
+  }: IBuildConfig) => {
     if (this.settings) {
       const emptyFiles = {};
       const luFiles: FileInfo[] = [];
@@ -475,8 +480,11 @@ export class BotProject implements IBotProject {
         }
       });
 
+      await this.preBuilder.prebuild(recognizerTypes, { crossTrainConfig, luFiles, qnaFiles, emptyFiles });
+
       this.builder.setBuildConfig(
         { ...luisConfig, subscriptionKey: qnaConfig.subscriptionKey, qnaRegion: qnaConfig.qnaRegion },
+        crossTrainConfig,
         this.settings.downsampling
       );
       await this.builder.build(luFiles, qnaFiles, Array.from(this.files.values()) as FileInfo[]);
@@ -713,20 +721,11 @@ export class BotProject implements IBotProject {
     }
   };
 
-  //migrate the recognizer folder
-  private removeRecognizers = async () => {
-    const paths = await this.fileStorage.glob('recognizers/cross-train.config.json', this.dataDir);
-    if (paths.length) {
-      await this.fileStorage.rmrfDir(Path.join(this.dataDir, 'recognizers'));
-    }
-  };
-
   private _getFiles = async () => {
     if (!(await this.exists())) {
       throw new Error(`${this.dir} is not a valid path`);
     }
 
-    await this.removeRecognizers();
     const fileList = new Map<string, FileInfo>();
     const patterns = [
       '**/*.dialog',
@@ -745,14 +744,13 @@ export class BotProject implements IBotProject {
       'app.schema',
       'app.uischema',
       '*.botproj',
-      'cross-train.config.json',
     ];
     for (const pattern of patterns) {
       // load only from the data dir, otherwise may get "build" versions from
       // deployment process
       const root = this.dataDir;
       const paths = await this.fileStorage.glob(
-        [pattern, '!(generated/**)', '!(runtime/**)', '!(scripts/**)', '!(settings/appsettings.json)'],
+        [pattern, '!(generated/**)', '!(runtime/**)', '!(recognizers/**)', '!(scripts/**)', '!(settings/**)'],
         root
       );
 

@@ -16,6 +16,7 @@ import { FeatureFlagController } from '../controllers/featureFlags';
 
 import { UtilitiesController } from './../controllers/utilities';
 import { AuthController } from '../controllers/auth';
+import { csrfProtection } from '../middleware/csrfProtection';
 
 const router: Router = express.Router({});
 
@@ -85,8 +86,8 @@ router.get('/extensions/:id/:bundleId', ExtensionsController.getBundleForView);
 // proxy route for extensions (allows extension client code to make fetch calls using the Composer server as a proxy -- avoids browser blocking request due to CORS)
 router.post('/extensions/proxy/:url', ExtensionsController.performExtensionFetch);
 
-// auth
-router.get('/auth/getAccessToken', AuthController.getAccessToken);
+// authentication from client
+router.get('/auth/getAccessToken', csrfProtection, AuthController.getAccessToken);
 
 //FeatureFlags
 router.get('/featureFlags', FeatureFlagController.getFeatureFlags);
